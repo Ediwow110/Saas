@@ -1,14 +1,7 @@
 import Link from "next/link";
-import { BarChart3, CalendarDays, UserRoundPlus, Users2 } from "lucide-react";
+import { BarChart3, CalendarDays, ShieldCheck, UserRoundPlus, Users2 } from "lucide-react";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { requireUser } from "@/lib/current-user";
-
-const navigation = [
-  { href: "/calendar", label: "Calendar", icon: CalendarDays },
-  { href: "/patients", label: "Patients", icon: Users2 },
-  { href: "/dashboard", label: "Reports", icon: BarChart3 },
-  { href: "/patients/new", label: "Add patient", icon: UserRoundPlus },
-];
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
@@ -18,6 +11,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .join("")
     .slice(0, 2)
     .toUpperCase();
+
+  const navigation = [
+    { href: "/calendar", label: "Calendar", icon: CalendarDays },
+    { href: "/patients", label: "Patients", icon: Users2 },
+    { href: "/dashboard", label: "Reports", icon: BarChart3 },
+    { href: "/patients/new", label: "Add patient", icon: UserRoundPlus },
+    ...(user.role === "OWNER" ? [{ href: "/team", label: "Team", icon: ShieldCheck }] : []),
+  ];
 
   return (
     <div className="min-h-screen px-3 py-3 sm:px-4 sm:py-4">
