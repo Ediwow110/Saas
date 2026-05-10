@@ -29,6 +29,7 @@
 
   html {
     min-height: 100%;
+    scroll-behavior: smooth;
     background:
       radial-gradient(circle at 8% 4%, rgba(15, 170, 162, 0.18), transparent 30%),
       radial-gradient(circle at 84% 0%, rgba(14, 165, 233, 0.12), transparent 26%),
@@ -77,14 +78,10 @@
   ::selection {
     background: rgba(15, 170, 162, 0.22);
   }
-
-  /* Smooth scrolling */
-  html {
-    scroll-behavior: smooth;
-  }
 }
 
 @layer utilities {
+  /* ── Surfaces ── */
   .surface {
     background: var(--panel);
     backdrop-filter: blur(22px);
@@ -114,58 +111,157 @@
     border-color: var(--border);
   }
 
-  /* Animated progress bar — set --bar-width via inline style */
+  /* ── Progress bar animation — set --bar-width via inline style ── */
   .bar-animate {
-    animation: grow-x 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     width: 0%;
+    animation: grow-x 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
-  /* Page entrance */
+  @keyframes grow-x {
+    from { width: 0%; }
+    to   { width: var(--bar-width, 0%); }
+  }
+
+  /* ── Page entrance ── */
   .page-enter {
     animation: fade-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
-  /* Skeleton shimmer */
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Skeleton shimmer ── */
   .skeleton {
-    background: linear-gradient(90deg, rgba(15, 118, 110, 0.06) 25%, rgba(15, 118, 110, 0.12) 50%, rgba(15, 118, 110, 0.06) 75%);
+    background: linear-gradient(
+      90deg,
+      rgba(15, 118, 110, 0.06) 25%,
+      rgba(15, 118, 110, 0.12) 50%,
+      rgba(15, 118, 110, 0.06) 75%
+    );
     background-size: 200% 100%;
     animation: skeleton-shimmer 1.6s ease-in-out infinite;
   }
 
   @keyframes skeleton-shimmer {
-    0% { background-position: 200% 0; }
+    0%   { background-position: 200% 0; }
     100% { background-position: -200% 0; }
   }
 
-  /* Toast base styles */
+  /* ── Toast entrance ── */
   .toast {
     animation: fade-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  /* Input hover ring */
+  /* ── Input field ── */
   .input-field {
-    @apply w-full rounded-[18px] border border-[var(--border)] bg-white px-4 py-3 text-sm text-[var(--text)] transition-all;
-    @apply hover:border-[var(--accent-strong)] hover:shadow-sm;
-    @apply focus:border-[var(--accent)] focus:ring-0;
+    display: block;
+    width: 100%;
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    background-color: #ffffff;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: var(--text);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
-  /* Primary button */
+  .input-field:hover {
+    border-color: var(--accent-strong);
+    box-shadow: 0 1px 3px rgba(15, 118, 110, 0.1);
+  }
+
+  .input-field:focus {
+    border-color: var(--accent);
+    outline: 3px solid rgba(15, 170, 162, 0.28);
+    outline-offset: 2px;
+  }
+
+  /* ── Primary button ── */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-[18px] bg-[var(--accent)] px-4 py-3 text-sm font-semibold text-white shadow-sm;
-    @apply transition-all hover:bg-[var(--accent-strong)] hover:shadow-md hover:shadow-teal-900/10 active:scale-[0.98];
-    @apply disabled:cursor-not-allowed disabled:opacity-60;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 18px;
+    background-color: var(--accent);
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #ffffff;
+    box-shadow: 0 1px 2px rgba(15, 118, 110, 0.1);
+    transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+    text-decoration: none;
   }
 
-  /* Secondary button */
+  .btn-primary:hover {
+    background-color: var(--accent-strong);
+    box-shadow: 0 4px 12px rgba(8, 117, 111, 0.18);
+  }
+
+  .btn-primary:active {
+    transform: scale(0.98);
+  }
+
+  .btn-primary:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  /* ── Secondary button ── */
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-[18px] border border-[var(--border)] bg-white/80 px-4 py-3 text-sm font-semibold text-[var(--text)];
-    @apply transition-all hover:bg-white hover:shadow-sm active:scale-[0.98];
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text);
+    transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+    text-decoration: none;
   }
 
-  /* Danger button */
+  .btn-secondary:hover {
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px rgba(15, 118, 110, 0.08);
+  }
+
+  .btn-secondary:active {
+    transform: scale(0.98);
+  }
+
+  /* ── Danger button ── */
   .btn-danger {
-    @apply inline-flex items-center justify-center gap-2 rounded-[18px] bg-rose-500 px-4 py-3 text-sm font-semibold text-white;
-    @apply transition-all hover:bg-rose-600 hover:shadow-md active:scale-[0.98];
-    @apply disabled:cursor-not-allowed disabled:opacity-60;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 18px;
+    background-color: #f43f5e;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #ffffff;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+  }
+
+  .btn-danger:hover {
+    background-color: #e11d48;
+    box-shadow: 0 4px 12px rgba(244, 63, 94, 0.2);
+  }
+
+  .btn-danger:active {
+    transform: scale(0.98);
+  }
+
+  .btn-danger:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
   }
 }
