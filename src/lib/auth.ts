@@ -1,5 +1,4 @@
 import { compare } from "bcryptjs";
-import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { z } from "zod";
 import { db } from "@/lib/db";
@@ -9,9 +8,8 @@ const credentialsSchema = z.object({
   password: z.string().min(8),
 });
 
-export const authOptions: NextAuthOptions = {
+export const authOptions = {
   session: { strategy: "jwt" },
-  pages: { signIn: "/login" },
   providers: [
     CredentialsProvider({
       name: "Email and password",
@@ -21,13 +19,19 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(rawCredentials) {
         const parsed = credentialsSchema.safeParse(rawCredentials);
-        if (!parsed.success) return null;
+        if (!parsed.success) {
+          return null;
+        }
 
         const user = await db.user.findUnique({ where: { email: parsed.data.email } });
-        if (!user) return null;
+        if (!user) {
+          return null;
+        }
 
         const isValid = await compare(parsed.data.password, user.passwordHash);
-        if (!isValid) return null;
+        if (!isValid) {
+          return null;
+        }
 
         return {
           id: user.id,
@@ -40,18 +44,22 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: any; user?: any }) {
       if (user) {
-        token.userId = (user as any).id;
-        token.clinicId = (user as any).clinicId;
-        token.role = (user as any).role;
+        token.userId = user.id;
+        token.clinicId = user.clinicId;
+        token.role = user.role;
       }
+
       return token;
     },
-    async session({ session, token }) {
-      (session.user as any).id = token.userId;
-      (session.user as any).clinicId = token.clinicId;
-      (session.user as any).role = token.role;
+    async session({ session, token }: { session: any; token: any }) {
+      if (session.user) {
+        session.user.id = token.userId;
+        session.user.clinicId = token.clinicId;
+        session.user.role = token.role;
+      }
+
       return session;
     },
   },
