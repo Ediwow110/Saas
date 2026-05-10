@@ -16,7 +16,7 @@ export async function requireUser(): Promise<AppUser> {
   const user = session?.user as any;
 
   if (!user?.id || !user?.clinicId) {
-    redirect("/api/auth/signin");
+    redirect("/login");
   }
 
   return {
