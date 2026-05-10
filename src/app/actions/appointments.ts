@@ -2,34 +2,46 @@
 
 import { addHours, subDays, subHours } from "date-fns";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/current-user";
 import { appointmentCreateSchema, appointmentStatusSchema } from "@/lib/validators";
 
-function normalizeAppointmentInput(input: unknown) {
-  if (input instanceof FormData) {
-    return {
-      patientId: input.get("patientId"),
-      startsAt: input.get("startsAt"),
-      endsAt: input.get("endsAt"),
-      reason: input.get("reason"),
-    };
-  }
+export type AppointmentFormState = {
+  error?: string;
+  success?: string;
+  redirectTo?: string;
+};
 
-  return input;
+export type StatusFormState = {
+  error?: string;
+  success?: string;
+};
+
+function normalizeAppointmentInput(input: FormData) {
+  return {
+    patientId: input.get("patientId"),
+    startsAt: input.get("startsAt"),
+    endsAt: input.get("endsAt"),
+    reason: input.get("reason"),
+  };
 }
 
-export async function createAppointment(input: unknown) {
+export async function createAppointmentAction(_: AppointmentFormState, formData: FormData): Promise<AppointmentFormState> {
   const user = await requireUser();
-  const data = appointmentCreateSchema.parse(normalizeAppointmentInput(input));
+  const parsed = appointmentCreateSchema.safeParse(normalizeAppointmentInput(formData));
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message || "Please review the appointment details." };
+  }
+
+  const data = parsed.data;
 
   const patient = await db.patient.findFirst({
     where: { id: data.patientId, clinicId: user.clinicId },
   });
 
   if (!patient) {
-    throw new Error("Patient not found");
+    return { error: "Patient not found." };
   }
 
   const overlapping = await db.appointment.findFirst({
@@ -42,7 +54,7 @@ export async function createAppointment(input: unknown) {
   });
 
   if (overlapping) {
-    throw new Error("Appointment overlaps with another booking");
+    return { error: "Appointment overlaps with another booking." };
   }
 
   const appointment = await db.appointment.create({
@@ -72,23 +84,37 @@ export async function createAppointment(input: unknown) {
 
   revalidatePath("/calendar");
   revalidatePath("/dashboard");
-  redirect("/calendar");
+  revalidatePath("/appointments/new");
+
+  return {
+    success: "Appointment saved successfully.",
+    redirectTo: "/calendar",
+  };
 }
 
-export async function updateAppointmentStatus(appointmentId: string, input: unknown) {
+export async function updateAppointmentStatusAction(_: StatusFormState, formData: FormData): Promise<StatusFormState> {
   const user = await requireUser();
-  const data = appointmentStatusSchema.parse(input);
+  const appointmentId = formData.get("appointmentId");
+  const parsed = appointmentStatusSchema.safeParse({ status: formData.get("status") });
+
+  if (typeof appointmentId !== "string" || !appointmentId) {
+    return { error: "Appointment not found." };
+  }
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message || "Status is invalid." };
+  }
 
   const result = await db.appointment.updateMany({
     where: { id: appointmentId, clinicId: user.clinicId },
-    data: { status: data.status },
+    data: { status: parsed.data.status },
   });
 
   if (result.count === 0) {
-    throw new Error("Appointment not found");
+    return { error: "Appointment not found." };
   }
 
-  if (["CANCELLED", "RESCHEDULED"].includes(data.status)) {
+  if (["CANCELLED", "RESCHEDULED"].includes(parsed.data.status)) {
     await db.reminderJob.updateMany({
       where: { appointmentId, clinicId: user.clinicId, status: "PENDING" },
       data: { status: "CANCELLED" },
@@ -97,4 +123,6 @@ export async function updateAppointmentStatus(appointmentId: string, input: unkn
 
   revalidatePath("/calendar");
   revalidatePath("/dashboard");
+
+  return { success: "Status updated." };
 }
