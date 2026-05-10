@@ -10,6 +10,7 @@ const credentialsSchema = z.object({
 
 export const authOptions = {
   session: { strategy: "jwt" },
+  pages: { signIn: "/login" },
   providers: [
     CredentialsProvider({
       name: "Email and password",
@@ -23,7 +24,7 @@ export const authOptions = {
           return null;
         }
 
-        const user = await db.user.findUnique({ where: { email: parsed.data.email } });
+        const user = await db.user.findUnique({ where: { email: parsed.data.email.toLowerCase() } });
         if (!user) {
           return null;
         }
