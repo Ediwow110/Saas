@@ -1,13 +1,30 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/current-user";
 import { patientCreateSchema } from "@/lib/validators";
 
+function normalizePatientInput(input: unknown) {
+  if (input instanceof FormData) {
+    return {
+      firstName: input.get("firstName"),
+      lastName: input.get("lastName"),
+      phone: input.get("phone"),
+      email: input.get("email"),
+      smsOptIn: input.get("smsOptIn") === "on",
+      emailOptIn: input.get("emailOptIn") === "on",
+      notes: input.get("notes"),
+    };
+  }
+
+  return input;
+}
+
 export async function createPatient(input: unknown) {
   const user = await requireUser();
-  const data = patientCreateSchema.parse(input);
+  const data = patientCreateSchema.parse(normalizePatientInput(input));
 
   await db.patient.create({
     data: {
@@ -23,4 +40,5 @@ export async function createPatient(input: unknown) {
   });
 
   revalidatePath("/patients");
+  redirect("/patients");
 }
