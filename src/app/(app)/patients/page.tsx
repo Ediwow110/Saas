@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Mail, MessageSquare, UserRoundPlus } from "lucide-react";
+import { DeletePatientForm } from "@/components/forms/delete-patient-form";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/current-user";
 
@@ -47,46 +48,59 @@ export default async function PatientsPage() {
           </div>
         ) : (
           <ul className="divide-y divide-[var(--border)]">
-            {patients.map((patient) => (
-              <li key={patient.id} className="grid gap-4 px-6 py-5 lg:grid-cols-[1.4fr_1fr_1fr] lg:items-center">
-                <div>
-                  <p className="text-base font-semibold text-[var(--text)]">
-                    {patient.lastName}, {patient.firstName}
-                  </p>
-                  <p className="mt-2 text-sm text-[var(--muted)]">{patient.notes || "No internal notes on file."}</p>
-                </div>
-                <div className="space-y-2 text-sm text-[var(--muted)]">
-                  <div className="flex items-center gap-2">
-                    <MessageSquare className="h-4 w-4 text-[var(--accent-strong)]" />
-                    <span>{patient.phone || "No phone"}</span>
+            {patients.map((patient) => {
+              const patientName = `${patient.firstName} ${patient.lastName}`;
+
+              return (
+                <li key={patient.id} className="grid gap-4 px-6 py-5 xl:grid-cols-[1.25fr_0.9fr_0.9fr_auto] xl:items-center">
+                  <div>
+                    <p className="text-base font-semibold text-[var(--text)]">
+                      {patient.lastName}, {patient.firstName}
+                    </p>
+                    <p className="mt-2 text-sm text-[var(--muted)]">{patient.notes || "No internal notes on file."}</p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-[var(--accent-strong)]" />
-                    <span>{patient.email || "No email"}</span>
+                  <div className="space-y-2 text-sm text-[var(--muted)]">
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="h-4 w-4 text-[var(--accent-strong)]" />
+                      <span>{patient.phone || "No phone"}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-[var(--accent-strong)]" />
+                      <span>{patient.email || "No email"}</span>
+                    </div>
                   </div>
-                </div>
-                <div className="flex flex-wrap gap-2 lg:justify-end">
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${
-                      patient.smsOptIn && patient.phone
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-slate-200 text-slate-600"
-                    }`}
-                  >
-                    SMS {patient.smsOptIn && patient.phone ? "ready" : "off"}
-                  </span>
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${
-                      patient.emailOptIn && patient.email
-                        ? "bg-sky-100 text-sky-700"
-                        : "bg-slate-200 text-slate-600"
-                    }`}
-                  >
-                    Email {patient.emailOptIn && patient.email ? "ready" : "off"}
-                  </span>
-                </div>
-              </li>
-            ))}
+                  <div className="flex flex-wrap gap-2">
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${
+                        patient.smsOptIn && patient.phone
+                          ? "bg-emerald-100 text-emerald-700"
+                          : "bg-slate-200 text-slate-600"
+                      }`}
+                    >
+                      SMS {patient.smsOptIn && patient.phone ? "ready" : "off"}
+                    </span>
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${
+                        patient.emailOptIn && patient.email
+                          ? "bg-sky-100 text-sky-700"
+                          : "bg-slate-200 text-slate-600"
+                      }`}
+                    >
+                      Email {patient.emailOptIn && patient.email ? "ready" : "off"}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 xl:justify-end">
+                    <Link
+                      href={`/patients/${patient.id}/edit`}
+                      className="rounded-2xl border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--text)] transition hover:bg-slate-50"
+                    >
+                      Edit
+                    </Link>
+                    <DeletePatientForm patientId={patient.id} patientName={patientName} />
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>
