@@ -21,14 +21,14 @@ export function NavLink({ href, label, icon: Icon }: NavLinkProps) {
       className={`group flex items-center gap-3 rounded-[20px] px-4 py-3 text-sm font-semibold transition-all duration-150 ${
         isActive
           ? "bg-[var(--accent)] text-white shadow-md shadow-teal-900/15"
-          : "text-[var(--text)] hover:bg-white/88 hover:shadow-sm"
+          : "text-[var(--text)] hover:bg-white/[0.88] hover:shadow-sm"
       }`}
     >
       <span
         className={`flex h-9 w-9 items-center justify-center rounded-[16px] transition-all duration-150 ${
           isActive
             ? "bg-white/20 text-white"
-            : "bg-white/72 text-[var(--accent-strong)] group-hover:bg-[var(--accent)] group-hover:text-white"
+            : "bg-white/[0.72] text-[var(--accent-strong)] group-hover:bg-[var(--accent)] group-hover:text-white"
         }`}
       >
         <Icon className="h-4 w-4" />

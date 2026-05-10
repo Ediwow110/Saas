@@ -35,7 +35,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen px-3 py-3 sm:px-5 sm:py-5">
-      <div className="mx-auto grid min-h-[calc(100vh-1.5rem)] max-w-[1640px] overflow-hidden rounded-[34px] border border-white/70 bg-white/46 shadow-soft ring-1 ring-[var(--border)] lg:grid-cols-[292px_1fr]">
+      <div className="mx-auto grid min-h-[calc(100vh-1.5rem)] max-w-[1640px] overflow-hidden rounded-[34px] border border-white/70 bg-white/[0.46] shadow-soft ring-1 ring-[var(--border)] lg:grid-cols-[292px_1fr]">
         {/* ── Desktop Sidebar ── */}
         <aside className="surface hidden border-r border-[var(--border)] px-6 py-6 lg:flex lg:flex-col">
           {/* Logo */}
@@ -50,7 +50,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </div>
 
           {/* User card */}
-          <div className="mt-8 overflow-hidden rounded-[22px] border border-white/70 bg-white/78 p-4 shadow-card">
+          <div className="mt-8 overflow-hidden rounded-[22px] border border-white/70 bg-white/[0.78] p-4 shadow-card">
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-sm font-bold text-[var(--accent-strong)]">
                 {initials}
@@ -97,8 +97,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               <PageHeader />
               <div className="flex items-center gap-3">
                 <div className="hidden flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)] xl:flex">
-                  <span className="rounded-full border border-[var(--border)] bg-white/72 px-3 py-1.5">HIPAA-minded</span>
-                  <span className="rounded-full border border-[var(--border)] bg-white/72 px-3 py-1.5">Fast front desk</span>
+                  <span className="rounded-full border border-[var(--border)] bg-white/[0.72] px-3 py-1.5">HIPAA-minded</span>
+                  <span className="rounded-full border border-[var(--border)] bg-white/[0.72] px-3 py-1.5">Fast front desk</span>
                 </div>
                 {/* Mobile hamburger */}
                 <MobileNav user={userForClient} navigation={navigation} />

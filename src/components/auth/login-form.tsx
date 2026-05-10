@@ -76,7 +76,8 @@ export function LoginForm({
             type={showPassword ? "text" : "password"}
             autoComplete="current-password"
             required
-            className="input-field pr-12"
+            style={{ paddingRight: "3rem" }}
+            className="input-field"
             placeholder="Your password"
           />
           <button
