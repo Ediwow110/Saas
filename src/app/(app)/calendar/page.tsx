@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { AlertTriangle, BellRing, CalendarClock } from "lucide-react";
-import { endOfDay, format, startOfDay } from "date-fns";
+import { AlertTriangle, BellRing, CalendarClock, ChevronLeft, ChevronRight } from "lucide-react";
+import { addDays, endOfDay, format, startOfDay } from "date-fns";
 import { AppointmentStatusForm } from "@/components/forms/appointment-status-form";
+import { DeleteAppointmentForm } from "@/components/forms/delete-appointment-form";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/current-user";
 
@@ -11,14 +12,20 @@ type CalendarPageProps = {
   }>;
 };
 
+function toDateParam(date: Date) {
+  return format(date, "yyyy-MM-dd");
+}
+
 export default async function CalendarPage({ searchParams }: CalendarPageProps) {
   const user = await requireUser();
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const dateParam = Array.isArray(resolvedSearchParams?.date)
     ? resolvedSearchParams?.date[0]
     : resolvedSearchParams?.date;
-  const parsedDate = dateParam ? new Date(dateParam) : new Date();
+  const parsedDate = dateParam ? new Date(`${dateParam}T00:00:00`) : new Date();
   const selected = Number.isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
+  const previousDay = addDays(selected, -1);
+  const nextDay = addDays(selected, 1);
 
   const appointments = await db.appointment.findMany({
     where: {
@@ -44,12 +51,34 @@ export default async function CalendarPage({ searchParams }: CalendarPageProps) 
             <h2 className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text)]">Daily schedule</h2>
             <p className="mt-2 text-sm text-[var(--muted)]">{format(selected, "EEEE, MMMM d, yyyy")}</p>
           </div>
-          <Link
-            href="/appointments/new"
-            className="inline-flex items-center justify-center rounded-2xl bg-[var(--accent)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[var(--accent-strong)]"
-          >
-            Book appointment
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href={`/calendar?date=${toDateParam(previousDay)}`}
+              className="inline-flex items-center gap-2 rounded-2xl border border-[var(--border)] bg-white/70 px-4 py-3 text-sm font-semibold text-[var(--text)] transition hover:bg-white"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Prev
+            </Link>
+            <Link
+              href="/calendar"
+              className="inline-flex items-center rounded-2xl border border-[var(--border)] bg-white/70 px-4 py-3 text-sm font-semibold text-[var(--text)] transition hover:bg-white"
+            >
+              Today
+            </Link>
+            <Link
+              href={`/calendar?date=${toDateParam(nextDay)}`}
+              className="inline-flex items-center gap-2 rounded-2xl border border-[var(--border)] bg-white/70 px-4 py-3 text-sm font-semibold text-[var(--text)] transition hover:bg-white"
+            >
+              Next
+              <ChevronRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/appointments/new"
+              className="inline-flex items-center justify-center rounded-2xl bg-[var(--accent)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[var(--accent-strong)]"
+            >
+              Book appointment
+            </Link>
+          </div>
         </div>
 
         <div className="mt-6 grid gap-3 sm:grid-cols-3">
@@ -72,7 +101,7 @@ export default async function CalendarPage({ searchParams }: CalendarPageProps) 
               const sentReminders = appointment.reminders.filter((reminder) => reminder.status === "SENT").length;
 
               return (
-                <li key={appointment.id} className="grid gap-4 px-6 py-5 lg:grid-cols-[140px_1fr_220px] lg:items-center">
+                <li key={appointment.id} className="grid gap-4 px-6 py-5 xl:grid-cols-[140px_1fr_260px] xl:items-center">
                   <div>
                     <p className="text-lg font-semibold text-[var(--text)]">{format(appointment.startsAt, "p")}</p>
                     <p className="text-sm text-[var(--muted)]">to {format(appointment.endsAt, "p")}</p>
@@ -94,7 +123,18 @@ export default async function CalendarPage({ searchParams }: CalendarPageProps) 
                       </p>
                     </div>
                   </div>
-                  <AppointmentStatusForm appointmentId={appointment.id} currentStatus={appointment.status} />
+                  <div className="space-y-3 xl:ml-auto xl:w-[260px]">
+                    <AppointmentStatusForm appointmentId={appointment.id} currentStatus={appointment.status} />
+                    <div className="flex flex-wrap gap-2">
+                      <Link
+                        href={`/appointments/${appointment.id}/edit`}
+                        className="rounded-2xl border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--text)] transition hover:bg-slate-50"
+                      >
+                        Edit
+                      </Link>
+                      <DeleteAppointmentForm appointmentId={appointment.id} />
+                    </div>
+                  </div>
                 </li>
               );
             })}
