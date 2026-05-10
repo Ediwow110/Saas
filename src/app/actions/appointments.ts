@@ -2,13 +2,27 @@
 
 import { addHours, subDays, subHours } from "date-fns";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/current-user";
 import { appointmentCreateSchema, appointmentStatusSchema } from "@/lib/validators";
 
+function normalizeAppointmentInput(input: unknown) {
+  if (input instanceof FormData) {
+    return {
+      patientId: input.get("patientId"),
+      startsAt: input.get("startsAt"),
+      endsAt: input.get("endsAt"),
+      reason: input.get("reason"),
+    };
+  }
+
+  return input;
+}
+
 export async function createAppointment(input: unknown) {
   const user = await requireUser();
-  const data = appointmentCreateSchema.parse(input);
+  const data = appointmentCreateSchema.parse(normalizeAppointmentInput(input));
 
   const patient = await db.patient.findFirst({
     where: { id: data.patientId, clinicId: user.clinicId },
@@ -58,6 +72,7 @@ export async function createAppointment(input: unknown) {
 
   revalidatePath("/calendar");
   revalidatePath("/dashboard");
+  redirect("/calendar");
 }
 
 export async function updateAppointmentStatus(appointmentId: string, input: unknown) {
