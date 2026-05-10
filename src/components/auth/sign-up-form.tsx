@@ -68,7 +68,8 @@ export function SignUpForm() {
               type={showPassword ? "text" : "password"}
               autoComplete="new-password"
               required
-              className="input-field pr-12"
+              style={{ paddingRight: "3rem" }}
+              className="input-field"
             />
             <button
               type="button"
@@ -91,7 +92,8 @@ export function SignUpForm() {
               type={showConfirm ? "text" : "password"}
               autoComplete="new-password"
               required
-              className="input-field pr-12"
+              style={{ paddingRight: "3rem" }}
+              className="input-field"
             />
             <button
               type="button"
