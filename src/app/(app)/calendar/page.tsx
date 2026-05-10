@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AlertTriangle, BellRing, CalendarClock } from "lucide-react";
 import { endOfDay, format, startOfDay } from "date-fns";
+import { AppointmentStatusForm } from "@/components/forms/appointment-status-form";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/current-user";
 
@@ -71,7 +72,7 @@ export default async function CalendarPage({ searchParams }: CalendarPageProps) 
               const sentReminders = appointment.reminders.filter((reminder) => reminder.status === "SENT").length;
 
               return (
-                <li key={appointment.id} className="grid gap-4 px-6 py-5 lg:grid-cols-[140px_1fr_180px] lg:items-center">
+                <li key={appointment.id} className="grid gap-4 px-6 py-5 lg:grid-cols-[140px_1fr_220px] lg:items-center">
                   <div>
                     <p className="text-lg font-semibold text-[var(--text)]">{format(appointment.startsAt, "p")}</p>
                     <p className="text-sm text-[var(--muted)]">to {format(appointment.endsAt, "p")}</p>
@@ -86,13 +87,14 @@ export default async function CalendarPage({ searchParams }: CalendarPageProps) 
                       </span>
                     </div>
                     <p className="mt-2 text-sm text-[var(--muted)]">{appointment.reason || "General dental appointment"}</p>
+                    <div className="mt-2 text-sm text-[var(--muted)]">
+                      <p>{sentReminders} reminders sent</p>
+                      <p className={failedReminders > 0 ? "mt-1 font-medium text-[var(--danger)]" : "mt-1 text-[var(--muted)]"}>
+                        {failedReminders} failed jobs
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-sm text-[var(--muted)] lg:text-right">
-                    <p>{sentReminders} reminders sent</p>
-                    <p className={failedReminders > 0 ? "mt-1 font-medium text-[var(--danger)]" : "mt-1 text-[var(--muted)]"}>
-                      {failedReminders} failed jobs
-                    </p>
-                  </div>
+                  <AppointmentStatusForm appointmentId={appointment.id} currentStatus={appointment.status} />
                 </li>
               );
             })}
