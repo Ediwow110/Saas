@@ -62,7 +62,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             })}
           </nav>
 
-          <div className="mt-8 rounded-[22px] border border-dashed border-[var(--border)] bg-[var(--accent-soft)]/70 p-4 text-sm text-[var(--muted)]">
+          <div className="mt-8 rounded-[22px] border border-dashed border-[var(--border)] bg-[var(--accent-soft)] p-4 text-sm text-[var(--muted)]">
             Keep schedules clean, capture consent early, and check the report view before missed appointments become a pattern.
           </div>
 
