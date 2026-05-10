@@ -70,12 +70,17 @@
   select:focus,
   textarea:focus,
   button:focus-visible {
-    outline: 3px solid rgba(15, 170, 162, 0.22);
+    outline: 3px solid rgba(15, 170, 162, 0.28);
     outline-offset: 2px;
   }
 
   ::selection {
     background: rgba(15, 170, 162, 0.22);
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
   }
 }
 
@@ -107,5 +112,60 @@
 
   .ring-border {
     border-color: var(--border);
+  }
+
+  /* Animated progress bar — set --bar-width via inline style */
+  .bar-animate {
+    animation: grow-x 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    width: 0%;
+  }
+
+  /* Page entrance */
+  .page-enter {
+    animation: fade-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* Skeleton shimmer */
+  .skeleton {
+    background: linear-gradient(90deg, rgba(15, 118, 110, 0.06) 25%, rgba(15, 118, 110, 0.12) 50%, rgba(15, 118, 110, 0.06) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.6s ease-in-out infinite;
+  }
+
+  @keyframes skeleton-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Toast base styles */
+  .toast {
+    animation: fade-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Input hover ring */
+  .input-field {
+    @apply w-full rounded-[18px] border border-[var(--border)] bg-white px-4 py-3 text-sm text-[var(--text)] transition-all;
+    @apply hover:border-[var(--accent-strong)] hover:shadow-sm;
+    @apply focus:border-[var(--accent)] focus:ring-0;
+  }
+
+  /* Primary button */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-[18px] bg-[var(--accent)] px-4 py-3 text-sm font-semibold text-white shadow-sm;
+    @apply transition-all hover:bg-[var(--accent-strong)] hover:shadow-md hover:shadow-teal-900/10 active:scale-[0.98];
+    @apply disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  /* Secondary button */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-[18px] border border-[var(--border)] bg-white/80 px-4 py-3 text-sm font-semibold text-[var(--text)];
+    @apply transition-all hover:bg-white hover:shadow-sm active:scale-[0.98];
+  }
+
+  /* Danger button */
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-[18px] bg-rose-500 px-4 py-3 text-sm font-semibold text-white;
+    @apply transition-all hover:bg-rose-600 hover:shadow-md active:scale-[0.98];
+    @apply disabled:cursor-not-allowed disabled:opacity-60;
   }
 }
