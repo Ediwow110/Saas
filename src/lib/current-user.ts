@@ -1,4 +1,5 @@
 import "server-only";
+import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -15,7 +16,7 @@ export async function requireUser(): Promise<AppUser> {
   const user = session?.user as any;
 
   if (!user?.id || !user?.clinicId) {
-    throw new Error("Unauthorized");
+    redirect("/api/auth/signin");
   }
 
   return {
