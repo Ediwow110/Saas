@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AlertTriangle, BellRing, CalendarClock, ChevronLeft, ChevronRight } from "lucide-react";
+import { AlertTriangle, BellRing, CalendarClock, CheckCircle2, ChevronLeft, ChevronRight, Clock3, Plus } from "lucide-react";
 import { addDays, endOfDay, format, startOfDay } from "date-fns";
 import { AppointmentStatusForm } from "@/components/forms/appointment-status-form";
 import { DeleteAppointmentForm } from "@/components/forms/delete-appointment-form";
@@ -41,58 +41,69 @@ export default async function CalendarPage({ searchParams }: CalendarPageProps) 
     0,
   );
   const completedCount = appointments.filter((appointment) => appointment.status === "COMPLETED").length;
+  const pendingCount = appointments.filter((appointment) => appointment.status !== "COMPLETED" && appointment.status !== "NO_SHOW").length;
 
   return (
     <section className="space-y-6">
-      <div className="surface rounded-[26px] border border-[var(--border)] px-6 py-6 sm:px-7">
+      <div className="clinic-gradient overflow-hidden rounded-[32px] border border-white/75 p-6 shadow-[var(--shadow-card)] sm:p-7">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.18em] text-[var(--accent)]">Calendar</p>
-            <h2 className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text)]">Daily schedule</h2>
-            <p className="mt-2 text-sm text-[var(--muted)]">{format(selected, "EEEE, MMMM d, yyyy")}</p>
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/72 px-4 py-2 text-sm font-semibold text-[var(--accent-strong)]">
+              <Clock3 className="h-4 w-4" />
+              {format(selected, "EEEE, MMMM d, yyyy")}
+            </div>
+            <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] text-[var(--text)] sm:text-5xl">Daily schedule</h2>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--muted)]">
+              A calm clinical timeline for bookings, reminder delivery, patient status, and front-desk follow-up.
+            </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Link
               href={`/calendar?date=${toDateParam(previousDay)}`}
-              className="inline-flex items-center gap-2 rounded-2xl border border-[var(--border)] bg-white/70 px-4 py-3 text-sm font-semibold text-[var(--text)] transition hover:bg-white"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/80 bg-white/72 px-4 py-3 text-sm font-semibold text-[var(--text)] shadow-sm transition hover:bg-white"
             >
               <ChevronLeft className="h-4 w-4" />
               Prev
             </Link>
             <Link
               href="/calendar"
-              className="inline-flex items-center rounded-2xl border border-[var(--border)] bg-white/70 px-4 py-3 text-sm font-semibold text-[var(--text)] transition hover:bg-white"
+              className="inline-flex items-center rounded-2xl border border-white/80 bg-white/72 px-4 py-3 text-sm font-semibold text-[var(--text)] shadow-sm transition hover:bg-white"
             >
               Today
             </Link>
             <Link
               href={`/calendar?date=${toDateParam(nextDay)}`}
-              className="inline-flex items-center gap-2 rounded-2xl border border-[var(--border)] bg-white/70 px-4 py-3 text-sm font-semibold text-[var(--text)] transition hover:bg-white"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/80 bg-white/72 px-4 py-3 text-sm font-semibold text-[var(--text)] shadow-sm transition hover:bg-white"
             >
               Next
               <ChevronRight className="h-4 w-4" />
             </Link>
             <Link
               href="/appointments/new"
-              className="inline-flex items-center justify-center rounded-2xl bg-[var(--accent)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[var(--accent-strong)]"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-teal-900/10 transition hover:bg-[var(--accent-strong)]"
             >
+              <Plus className="h-4 w-4" />
               Book appointment
             </Link>
           </div>
         </div>
 
-        <div className="mt-6 grid gap-3 sm:grid-cols-3">
-          <MetricTile icon={CalendarClock} label="Appointments" value={appointments.length} detail="Scheduled for this day" />
-          <MetricTile icon={BellRing} label="Completed" value={completedCount} detail="Marked done today" />
-          <MetricTile icon={AlertTriangle} label="Reminder issues" value={reminderFailures} detail="Jobs that need review" />
+        <div className="mt-7 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <MetricTile icon={CalendarClock} label="Appointments" value={appointments.length} detail="Scheduled today" />
+          <MetricTile icon={CheckCircle2} label="Completed" value={completedCount} detail="Finished visits" />
+          <MetricTile icon={BellRing} label="Pending" value={pendingCount} detail="Still in flow" />
+          <MetricTile icon={AlertTriangle} label="Reminder issues" value={reminderFailures} detail="Needs review" danger={reminderFailures > 0} />
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-[26px] border border-[var(--border)] bg-white/80">
+      <div className="overflow-hidden rounded-[32px] border border-white/75 bg-white/82 shadow-[var(--shadow-card)]">
         {appointments.length === 0 ? (
-          <div className="px-6 py-12 text-center">
-            <p className="text-lg font-semibold text-[var(--text)]">Nothing booked yet</p>
-            <p className="mt-2 text-sm text-[var(--muted)]">Add the first appointment for this day to start reminder tracking.</p>
+          <div className="px-6 py-16 text-center">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[24px] bg-[var(--accent-soft)] text-[var(--accent-strong)]">
+              <CalendarClock className="h-7 w-7" />
+            </div>
+            <p className="mt-5 text-xl font-semibold text-[var(--text)]">No appointments booked</p>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--muted)]">Add the first appointment for this day to start reminder tracking and keep the clinic schedule visible.</p>
           </div>
         ) : (
           <ul className="divide-y divide-[var(--border)]">
@@ -101,34 +112,34 @@ export default async function CalendarPage({ searchParams }: CalendarPageProps) 
               const sentReminders = appointment.reminders.filter((reminder) => reminder.status === "SENT").length;
 
               return (
-                <li key={appointment.id} className="grid gap-4 px-6 py-5 xl:grid-cols-[140px_1fr_260px] xl:items-center">
-                  <div>
-                    <p className="text-lg font-semibold text-[var(--text)]">{format(appointment.startsAt, "p")}</p>
-                    <p className="text-sm text-[var(--muted)]">to {format(appointment.endsAt, "p")}</p>
+                <li key={appointment.id} className="grid gap-5 px-6 py-5 transition hover:bg-[var(--accent-wash)]/55 xl:grid-cols-[150px_1fr_280px] xl:items-center">
+                  <div className="rounded-[24px] border border-[var(--border)] bg-white/72 p-4">
+                    <p className="text-xl font-semibold tracking-tight text-[var(--text)]">{format(appointment.startsAt, "p")}</p>
+                    <p className="mt-1 text-sm text-[var(--muted)]">to {format(appointment.endsAt, "p")}</p>
                   </div>
                   <div>
                     <div className="flex flex-wrap items-center gap-3">
-                      <p className="text-base font-semibold text-[var(--text)]">
+                      <p className="text-lg font-semibold text-[var(--text)]">
                         {appointment.patient.firstName} {appointment.patient.lastName}
                       </p>
-                      <span className="rounded-full bg-[var(--accent-soft)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--accent-strong)]">
+                      <span className="rounded-full bg-[var(--accent-soft)] px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-[var(--accent-strong)]">
                         {appointment.status.replace("_", " ")}
                       </span>
                     </div>
-                    <p className="mt-2 text-sm text-[var(--muted)]">{appointment.reason || "General dental appointment"}</p>
-                    <div className="mt-2 text-sm text-[var(--muted)]">
-                      <p>{sentReminders} reminders sent</p>
-                      <p className={failedReminders > 0 ? "mt-1 font-medium text-[var(--danger)]" : "mt-1 text-[var(--muted)]"}>
+                    <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{appointment.reason || "General dental appointment"}</p>
+                    <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-[var(--muted)]">
+                      <span className="rounded-full border border-[var(--border)] bg-white/72 px-3 py-2">{sentReminders} reminders sent</span>
+                      <span className={failedReminders > 0 ? "rounded-full bg-red-50 px-3 py-2 text-[var(--danger)]" : "rounded-full border border-[var(--border)] bg-white/72 px-3 py-2"}>
                         {failedReminders} failed jobs
-                      </p>
+                      </span>
                     </div>
                   </div>
-                  <div className="space-y-3 xl:ml-auto xl:w-[260px]">
+                  <div className="space-y-3 xl:ml-auto xl:w-[280px]">
                     <AppointmentStatusForm appointmentId={appointment.id} currentStatus={appointment.status} />
                     <div className="flex flex-wrap gap-2">
                       <Link
                         href={`/appointments/${appointment.id}/edit`}
-                        className="rounded-2xl border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--text)] transition hover:bg-slate-50"
+                        className="rounded-2xl border border-[var(--border)] bg-white/72 px-4 py-2 text-sm font-semibold text-[var(--text)] transition hover:bg-white"
                       >
                         Edit
                       </Link>
@@ -150,20 +161,22 @@ function MetricTile({
   label,
   value,
   detail,
+  danger = false,
 }: {
   icon: typeof CalendarClock;
   label: string;
   value: number;
   detail: string;
+  danger?: boolean;
 }) {
   return (
-    <div className="rounded-[22px] border border-[var(--border)] bg-white/70 px-4 py-4">
+    <div className="rounded-[24px] border border-white/80 bg-white/72 px-4 py-4 shadow-sm">
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)]">
+        <div className={danger ? "flex h-11 w-11 items-center justify-center rounded-2xl bg-red-50 text-[var(--danger)]" : "flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)]"}>
           <Icon className="h-4 w-4" />
         </div>
         <div>
-          <p className="text-sm font-medium text-[var(--text)]">{label}</p>
+          <p className="text-sm font-semibold text-[var(--text)]">{label}</p>
           <p className="text-xs text-[var(--muted)]">{detail}</p>
         </div>
       </div>
