@@ -3,18 +3,22 @@
 @tailwind utilities;
 
 :root {
-  --bg: #f4f1ea;
-  --bg-strong: #ebe5d8;
-  --panel: rgba(255, 252, 247, 0.84);
-  --panel-strong: #fffaf2;
-  --border: rgba(107, 88, 56, 0.14);
-  --text: #1f2937;
-  --muted: #6b7280;
-  --accent: #b45309;
-  --accent-strong: #92400e;
-  --accent-soft: rgba(180, 83, 9, 0.12);
+  --bg: #eef8f7;
+  --bg-strong: #d9f0ee;
+  --panel: rgba(255, 255, 255, 0.82);
+  --panel-strong: #ffffff;
+  --border: rgba(15, 118, 110, 0.14);
+  --text: #102a2d;
+  --muted: #5f7478;
+  --accent: #0faaa2;
+  --accent-strong: #08756f;
+  --accent-soft: rgba(15, 170, 162, 0.13);
+  --accent-wash: rgba(216, 249, 246, 0.72);
   --success: #0f766e;
-  --danger: #b91c1c;
+  --danger: #dc2626;
+  --warning: #d97706;
+  --shadow-soft: 0 24px 70px rgba(15, 118, 110, 0.11);
+  --shadow-card: 0 18px 44px rgba(16, 42, 45, 0.08);
 }
 
 @layer base {
@@ -26,16 +30,19 @@
   html {
     min-height: 100%;
     background:
-      radial-gradient(circle at top left, rgba(180, 83, 9, 0.12), transparent 30%),
-      radial-gradient(circle at bottom right, rgba(15, 118, 110, 0.1), transparent 26%),
-      var(--bg);
+      radial-gradient(circle at 8% 4%, rgba(15, 170, 162, 0.18), transparent 30%),
+      radial-gradient(circle at 84% 0%, rgba(14, 165, 233, 0.12), transparent 26%),
+      linear-gradient(135deg, #f7fffe 0%, var(--bg) 42%, #f4fbff 100%);
   }
 
   body {
     margin: 0;
     min-height: 100vh;
     color: var(--text);
-    background: transparent;
+    background:
+      linear-gradient(rgba(255, 255, 255, 0.38) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.38) 1px, transparent 1px);
+    background-size: 44px 44px;
     font-family: var(--font-sans), sans-serif;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -53,27 +60,45 @@
     font: inherit;
   }
 
+  input,
+  select,
+  textarea {
+    border-radius: 18px;
+  }
+
   input:focus,
   select:focus,
   textarea:focus,
   button:focus-visible {
-    outline: 2px solid rgba(180, 83, 9, 0.32);
+    outline: 3px solid rgba(15, 170, 162, 0.22);
     outline-offset: 2px;
   }
 
   ::selection {
-    background: rgba(180, 83, 9, 0.18);
+    background: rgba(15, 170, 162, 0.22);
   }
 }
 
 @layer utilities {
   .surface {
     background: var(--panel);
-    backdrop-filter: blur(16px);
+    backdrop-filter: blur(22px);
   }
 
   .surface-strong {
     background: var(--panel-strong);
+  }
+
+  .clinic-card {
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.84);
+    box-shadow: var(--shadow-card);
+  }
+
+  .clinic-gradient {
+    background:
+      radial-gradient(circle at top left, rgba(255, 255, 255, 0.9), transparent 34%),
+      linear-gradient(135deg, #e3fbf8 0%, #f8ffff 48%, #eaf6ff 100%);
   }
 
   .ink-muted {
