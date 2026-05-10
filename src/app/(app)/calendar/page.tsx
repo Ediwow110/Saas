@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AlertTriangle, BellRing, CalendarClock } from "lucide-react";
 import { endOfDay, format, startOfDay } from "date-fns";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/current-user";
@@ -27,42 +28,71 @@ export default async function CalendarPage({ searchParams }: CalendarPageProps) 
     orderBy: { startsAt: "asc" },
   });
 
+  const reminderFailures = appointments.reduce(
+    (total, appointment) => total + appointment.reminders.filter((reminder) => reminder.status === "FAILED").length,
+    0,
+  );
+  const completedCount = appointments.filter((appointment) => appointment.status === "COMPLETED").length;
+
   return (
     <section className="space-y-6">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Daily calendar</h1>
-          <p className="text-sm text-slate-500">{format(selected, "EEEE, MMMM d, yyyy")}</p>
+      <div className="surface rounded-[26px] border border-[var(--border)] px-6 py-6 sm:px-7">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-sm uppercase tracking-[0.18em] text-[var(--accent)]">Calendar</p>
+            <h2 className="mt-2 text-3xl font-semibold tracking-tight text-[var(--text)]">Daily schedule</h2>
+            <p className="mt-2 text-sm text-[var(--muted)]">{format(selected, "EEEE, MMMM d, yyyy")}</p>
+          </div>
+          <Link
+            href="/appointments/new"
+            className="inline-flex items-center justify-center rounded-2xl bg-[var(--accent)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[var(--accent-strong)]"
+          >
+            Book appointment
+          </Link>
         </div>
-        <Link href="/appointments/new" className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white">
-          Book appointment
-        </Link>
+
+        <div className="mt-6 grid gap-3 sm:grid-cols-3">
+          <MetricTile icon={CalendarClock} label="Appointments" value={appointments.length} detail="Scheduled for this day" />
+          <MetricTile icon={BellRing} label="Completed" value={completedCount} detail="Marked done today" />
+          <MetricTile icon={AlertTriangle} label="Reminder issues" value={reminderFailures} detail="Jobs that need review" />
+        </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
+      <div className="overflow-hidden rounded-[26px] border border-[var(--border)] bg-white/80">
         {appointments.length === 0 ? (
-          <div className="p-8 text-center text-sm text-slate-500">No appointments today.</div>
+          <div className="px-6 py-12 text-center">
+            <p className="text-lg font-semibold text-[var(--text)]">Nothing booked yet</p>
+            <p className="mt-2 text-sm text-[var(--muted)]">Add the first appointment for this day to start reminder tracking.</p>
+          </div>
         ) : (
-          <ul className="divide-y">
+          <ul className="divide-y divide-[var(--border)]">
             {appointments.map((appointment) => {
               const failedReminders = appointment.reminders.filter((reminder) => reminder.status === "FAILED").length;
               const sentReminders = appointment.reminders.filter((reminder) => reminder.status === "SENT").length;
 
               return (
-                <li key={appointment.id} className="grid gap-2 p-4 sm:grid-cols-[120px_1fr_160px] sm:items-center">
-                  <div className="font-medium">{format(appointment.startsAt, "p")}</div>
+                <li key={appointment.id} className="grid gap-4 px-6 py-5 lg:grid-cols-[140px_1fr_180px] lg:items-center">
                   <div>
-                    <div className="font-medium">
-                      {appointment.patient.firstName} {appointment.patient.lastName}
-                    </div>
-                    <div className="text-sm text-slate-500">{appointment.reason || "Dental appointment"}</div>
-                    <div className="mt-1 text-xs text-slate-400">
-                      {sentReminders} sent reminders · {failedReminders} failed
-                    </div>
+                    <p className="text-lg font-semibold text-[var(--text)]">{format(appointment.startsAt, "p")}</p>
+                    <p className="text-sm text-[var(--muted)]">to {format(appointment.endsAt, "p")}</p>
                   </div>
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-center text-xs font-medium text-slate-700">
-                    {appointment.status}
-                  </span>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <p className="text-base font-semibold text-[var(--text)]">
+                        {appointment.patient.firstName} {appointment.patient.lastName}
+                      </p>
+                      <span className="rounded-full bg-[var(--accent-soft)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--accent-strong)]">
+                        {appointment.status.replace("_", " ")}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-sm text-[var(--muted)]">{appointment.reason || "General dental appointment"}</p>
+                  </div>
+                  <div className="text-sm text-[var(--muted)] lg:text-right">
+                    <p>{sentReminders} reminders sent</p>
+                    <p className={failedReminders > 0 ? "mt-1 font-medium text-[var(--danger)]" : "mt-1 text-[var(--muted)]"}>
+                      {failedReminders} failed jobs
+                    </p>
+                  </div>
                 </li>
               );
             })}
@@ -70,5 +100,32 @@ export default async function CalendarPage({ searchParams }: CalendarPageProps) 
         )}
       </div>
     </section>
+  );
+}
+
+function MetricTile({
+  icon: Icon,
+  label,
+  value,
+  detail,
+}: {
+  icon: typeof CalendarClock;
+  label: string;
+  value: number;
+  detail: string;
+}) {
+  return (
+    <div className="rounded-[22px] border border-[var(--border)] bg-white/70 px-4 py-4">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-strong)]">
+          <Icon className="h-4 w-4" />
+        </div>
+        <div>
+          <p className="text-sm font-medium text-[var(--text)]">{label}</p>
+          <p className="text-xs text-[var(--muted)]">{detail}</p>
+        </div>
+      </div>
+      <p className="mt-4 text-3xl font-semibold tracking-tight text-[var(--text)]">{value}</p>
+    </div>
   );
 }
