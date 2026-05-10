@@ -2,13 +2,26 @@
 
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createPatientAction, type FormActionState } from "@/app/actions/patients";
+import { createPatientAction, updatePatientAction, type FormActionState } from "@/app/actions/patients";
 
 const initialState: FormActionState = {};
 
-export function PatientIntakeForm() {
+type PatientFormValues = {
+  id?: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string | null;
+  email?: string | null;
+  smsOptIn?: boolean;
+  emailOptIn?: boolean;
+  notes?: string | null;
+};
+
+export function PatientIntakeForm({ patient }: { patient?: PatientFormValues }) {
   const router = useRouter();
-  const [state, formAction, isPending] = useActionState(createPatientAction, initialState);
+  const action = patient?.id ? updatePatientAction : createPatientAction;
+  const [state, formAction, isPending] = useActionState(action, initialState);
+  const isEditing = Boolean(patient?.id);
 
   useEffect(() => {
     if (state.redirectTo) {
@@ -19,6 +32,8 @@ export function PatientIntakeForm() {
 
   return (
     <form action={formAction} className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+      {patient?.id ? <input type="hidden" name="patientId" value={patient.id} /> : null}
+
       <div className="space-y-6 rounded-[26px] border border-[var(--border)] bg-white/80 px-6 py-6">
         <div>
           <p className="text-sm font-medium text-[var(--text)]">Patient details</p>
@@ -28,28 +43,28 @@ export function PatientIntakeForm() {
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="space-y-2 text-sm font-medium text-[var(--text)]">
             <span>First name</span>
-            <input name="firstName" required className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm" />
+            <input name="firstName" required defaultValue={patient?.firstName ?? ""} className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm" />
           </label>
           <label className="space-y-2 text-sm font-medium text-[var(--text)]">
             <span>Last name</span>
-            <input name="lastName" required className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm" />
+            <input name="lastName" required defaultValue={patient?.lastName ?? ""} className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm" />
           </label>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="space-y-2 text-sm font-medium text-[var(--text)]">
             <span>Phone</span>
-            <input name="phone" type="tel" className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm" />
+            <input name="phone" type="tel" defaultValue={patient?.phone ?? ""} className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm" />
           </label>
           <label className="space-y-2 text-sm font-medium text-[var(--text)]">
             <span>Email</span>
-            <input name="email" type="email" className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm" />
+            <input name="email" type="email" defaultValue={patient?.email ?? ""} className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm" />
           </label>
         </div>
 
         <label className="block space-y-2 text-sm font-medium text-[var(--text)]">
           <span>Notes</span>
-          <textarea name="notes" rows={5} className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm" />
+          <textarea name="notes" rows={5} defaultValue={patient?.notes ?? ""} className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm" />
         </label>
       </div>
 
@@ -60,7 +75,7 @@ export function PatientIntakeForm() {
         </div>
 
         <label className="flex items-start gap-3 rounded-2xl border border-[var(--border)] px-4 py-4 text-sm text-[var(--text)]">
-          <input name="smsOptIn" type="checkbox" defaultChecked className="mt-1 h-4 w-4 rounded border-slate-300" />
+          <input name="smsOptIn" type="checkbox" defaultChecked={patient?.smsOptIn ?? true} className="mt-1 h-4 w-4 rounded border-slate-300" />
           <span>
             <strong className="block">Allow SMS reminders</strong>
             <span className="mt-1 block text-[var(--muted)]">Use for appointment reminders sent one day and two hours before the visit.</span>
@@ -68,7 +83,7 @@ export function PatientIntakeForm() {
         </label>
 
         <label className="flex items-start gap-3 rounded-2xl border border-[var(--border)] px-4 py-4 text-sm text-[var(--text)]">
-          <input name="emailOptIn" type="checkbox" defaultChecked className="mt-1 h-4 w-4 rounded border-slate-300" />
+          <input name="emailOptIn" type="checkbox" defaultChecked={patient?.emailOptIn ?? true} className="mt-1 h-4 w-4 rounded border-slate-300" />
           <span>
             <strong className="block">Allow email reminders</strong>
             <span className="mt-1 block text-[var(--muted)]">Use when email is the preferred or backup communication channel.</span>
@@ -79,7 +94,7 @@ export function PatientIntakeForm() {
         {state.success && !state.redirectTo ? <p className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{state.success}</p> : null}
 
         <button type="submit" disabled={isPending} className="w-full rounded-2xl bg-[var(--accent)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[var(--accent-strong)] disabled:cursor-not-allowed disabled:opacity-70">
-          {isPending ? "Saving patient..." : "Save patient"}
+          {isPending ? (isEditing ? "Updating patient..." : "Saving patient...") : isEditing ? "Update patient" : "Save patient"}
         </button>
       </div>
     </form>
