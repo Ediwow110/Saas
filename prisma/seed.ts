@@ -7,7 +7,11 @@ async function main() {
 
   const clinic = await db.clinic.upsert({
     where: { id: "seed-clinic" },
-    update: {},
+    update: {
+      name: "Demo Dental Clinic",
+      timezone: "Asia/Manila",
+      phone: "+630000000000",
+    },
     create: {
       id: "seed-clinic",
       name: "Demo Dental Clinic",
@@ -18,7 +22,12 @@ async function main() {
 
   await db.user.upsert({
     where: { email: "owner@example.com" },
-    update: {},
+    update: {
+      clinicId: clinic.id,
+      name: "Demo Owner",
+      passwordHash,
+      role: "OWNER",
+    },
     create: {
       clinicId: clinic.id,
       email: "owner@example.com",
@@ -28,29 +37,58 @@ async function main() {
     },
   });
 
-  const patient = await db.patient.create({
-    data: {
+  const existingPatient = await db.patient.findFirst({
+    where: {
       clinicId: clinic.id,
-      firstName: "Maria",
-      lastName: "Santos",
-      phone: "+639000000000",
       email: "maria@example.com",
-      smsOptIn: true,
-      emailOptIn: true,
     },
   });
 
+  const patient = existingPatient
+    ? await db.patient.update({
+        where: { id: existingPatient.id },
+        data: {
+          firstName: "Maria",
+          lastName: "Santos",
+          phone: "+639000000000",
+          email: "maria@example.com",
+          smsOptIn: true,
+          emailOptIn: true,
+        },
+      })
+    : await db.patient.create({
+        data: {
+          clinicId: clinic.id,
+          firstName: "Maria",
+          lastName: "Santos",
+          phone: "+639000000000",
+          email: "maria@example.com",
+          smsOptIn: true,
+          emailOptIn: true,
+        },
+      });
+
   const start = setMinutes(setHours(addDays(new Date(), 1), 9), 0);
-  await db.appointment.create({
-    data: {
+  const existingAppointment = await db.appointment.findFirst({
+    where: {
       clinicId: clinic.id,
       patientId: patient.id,
       startsAt: start,
-      endsAt: addMinutes(start, 30),
-      reason: "Cleaning",
-      status: "SCHEDULED",
     },
   });
+
+  if (!existingAppointment) {
+    await db.appointment.create({
+      data: {
+        clinicId: clinic.id,
+        patientId: patient.id,
+        startsAt: start,
+        endsAt: addMinutes(start, 30),
+        reason: "Cleaning",
+        status: "SCHEDULED",
+      },
+    });
+  }
 }
 
 main()
